@@ -1,53 +1,16 @@
 <script setup lang="ts">
-import { X } from "lucide-vue-next"
+import { Upload, X, Image } from "lucide-vue-next"
 import { Check } from "lucide-vue-next"
 import { CSSProperties, Ref, ref } from "vue"
 interface Props {
-  isImageCorrect: (filename: string) => boolean
-  placeholder: string
+  hovered: boolean
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  (e: "imageAccepted"): void
+  (e: "imageLoaded", url: string): void
 }>()
-
-function handleDragOver(event: DragEvent) {
-  style.value.boxShadow = "inset 0px 0px 0px 4px #aaa"
-  event.preventDefault()
-}
-
-function handleDragLeave() {
-  delete style.value.boxShadow
-}
-
-function handleDrop(event: DragEvent) {
-  delete style.value.boxShadow
-  event.preventDefault()
-
-  const data = event.dataTransfer?.getData("application/url")
-
-  if (data !== undefined && data !== "") {
-    const { filename } = JSON.parse(data)
-    if (props.isImageCorrect(filename)) {
-      flashCorrect()
-      emit("imageAccepted")
-    } else {
-      flashWrong()
-    }
-    return
-  }
-
-  const file = event.dataTransfer?.files.item(0)
-  if (file) {
-    if (style.value.backgroundImage !== undefined) {
-      URL.revokeObjectURL(style.value.backgroundImage)
-    }
-
-    style.value.backgroundImage = `url(${URL.createObjectURL(file)})`
-  }
-}
 
 async function flashCorrect() {
   if (flashCorrectElement.value?.classList.contains("flash1")) {
@@ -69,24 +32,60 @@ async function flashWrong() {
   }
 }
 
+function handleFileChange(event: Event) {
+  if (event.target === null) {
+    return
+  }
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file === undefined) {
+    return
+  }
+
+  if (style.value.backgroundImage !== undefined) {
+    URL.revokeObjectURL(style.value.backgroundImage)
+  }
+
+  const url = URL.createObjectURL(file)
+
+  style.value.backgroundImage = `url(${url})`
+
+  emit("imageLoaded", url)
+}
+
 const flashCorrectElement: Ref<HTMLDivElement | null> = ref(null)
 const flashWrongElement: Ref<HTMLDivElement | null> = ref(null)
 const style: Ref<CSSProperties> = ref({})
+
+defineExpose({
+  flashCorrect,
+  flashWrong,
+})
 </script>
 
 <template>
   <div
-    @drop="handleDrop"
-    @dragleave="handleDragLeave"
-    @dragover="handleDragOver"
-    class="relative bg-contain bg-no-repeat bg-center"
+    class="relative bg-contain bg-no-repeat bg-center items-center justify-center"
+    :class="hovered ? 'highlight' : ''"
     :style="style"
   >
+    <input
+      v-if="style.backgroundImage === undefined"
+      type="file"
+      class="absolute w-full h-full opacity-0 cursor-pointer"
+      @change="handleFileChange"
+    />
     <div
       v-if="style.backgroundImage === undefined"
-      class="flex w-full h-full text-sm flex-col items-center justify-center"
+      class="flex w-full h-full text-sm flex-col items-center justify-center p-8"
     >
-      <p class="text-center">{{ placeholder }}</p>
+      <div
+        class="w-full gap-4 text-gray-500 border-gray-500 border-2 aspect-square items-center flex-col justify-center flex border-dashed rounded-xl"
+      >
+        <Image :size="100" />
+        <Upload :size="40" />
+        Bild hochladen
+      </div>
     </div>
     <div
       ref="flashWrongElement"
@@ -140,5 +139,9 @@ const style: Ref<CSSProperties> = ref({})
   100% {
     opacity: 0%;
   }
+}
+
+.highlight {
+  box-shadow: inset 0px 0px 0px 4px #aaa;
 }
 </style>
