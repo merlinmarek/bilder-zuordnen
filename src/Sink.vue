@@ -6,6 +6,7 @@ interface Props {
   hovered: boolean
 }
 
+// @ts-ignore
 const props = defineProps<Props>()
 
 const emit = defineEmits<{

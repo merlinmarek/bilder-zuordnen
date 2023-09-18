@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { Upload, X, Image } from "lucide-vue-next"
+import { Upload, Image } from "lucide-vue-next"
 import { Ref, computed, ref } from "vue"
 import Sink from "./Sink.vue"
-import Source from "./Source.vue"
 import ConfettiExplosion from "vue-confetti-explosion"
-
-const sourceElement: Ref<typeof Source | null> = ref(null)
 
 const files: Ref<File[]> = ref([])
 const fileIndex = ref(0)
@@ -78,7 +75,7 @@ function handleTouchMove(event: TouchEvent) {
   )
 }
 
-async function handleTouchEnd(event: TouchEvent) {
+async function handleTouchEnd(_event: TouchEvent) {
   document.removeEventListener("touchmove", handleTouchMove)
   document.removeEventListener("touchend", handleTouchEnd)
 
@@ -133,7 +130,7 @@ function handleMouseMove(event: MouseEvent) {
   )
 }
 
-async function handleMouseUp(event: MouseEvent) {
+async function handleMouseUp(_event: MouseEvent) {
   document.removeEventListener("mousemove", handleMouseMove)
   document.removeEventListener("mouseup", handleMouseUp)
 
