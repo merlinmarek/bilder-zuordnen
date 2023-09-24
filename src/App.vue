@@ -30,6 +30,14 @@ const filename = computed(() => {
 const isLeft = computed(() => filename.value.startsWith("links"))
 const isRight = computed(() => filename.value.startsWith("rechts"))
 
+function shuffle<T>(array: T[]) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[array[i], array[j]] = [array[j], array[i]]
+  }
+  return array
+}
+
 function handleFileChange(event: Event) {
   if (event.target === null) {
     return
@@ -41,7 +49,7 @@ function handleFileChange(event: Event) {
     return
   }
 
-  files.value = Array.from(target.files).sort(() => 0.5 - Math.random())
+  files.value = shuffle(Array.from(target.files))
   fileIndex.value = 0
 }
 
