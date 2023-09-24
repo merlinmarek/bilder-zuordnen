@@ -41,7 +41,7 @@ function handleFileChange(event: Event) {
     return
   }
 
-  files.value = Array.from(target.files)
+  files.value = Array.from(target.files).sort(() => 0.5 - Math.random())
   fileIndex.value = 0
 }
 
